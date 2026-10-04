@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>读法库 · 红楼梦研读</title>
+<link rel="stylesheet" href="assets/css/site.css"/>
+<style>
+  .mv { scroll-margin-top: 70px; margin-bottom: 18px; }
+  .mv h3 { margin: 0 0 4px; font-size: 19px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .mv .rule { font-family: var(--serif); font-size: 16px; color: var(--ink); line-height: 1.8; margin: 6px 0 10px; }
+  .mv dl { margin: 0; display: grid; grid-template-columns: 5.5em 1fr; gap: 6px 12px; font-size: 14px; line-height: 1.8; }
+  .mv dt { color: var(--ink-3); font-family: var(--sans); font-size: 12px; letter-spacing: .1em; padding-top: 3px; }
+  .mv dd { margin: 0; color: var(--ink-2); }
+  .mv .where { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13.5px; }
+  .mv .where a { display: block; padding: 3px 0; color: var(--ink-2); }
+  .mv .where a b { font-family: var(--sans); font-size: 11.5px; font-weight: 700; margin-right: 6px; color: var(--ink-3); }
+  .mv .where a em { font-style: normal; font-size: 11px; margin-left: 6px; color: var(--jin); }
+  .mv:target { box-shadow: 0 0 0 2px color-mix(in srgb, var(--k-si) 55%, transparent); }
+  .principle { font-size: 14.5px; line-height: 1.9; }
+  .principle p { margin: 0 0 .7em; }
+  @media (max-width: 560px) { .mv dl { grid-template-columns: 1fr; gap: 0 0; } .mv dt { padding-top: 8px; } }
+</style>
+</head>
+<body>
+<div class="wrap narrow">
+  <h1>读法库</h1>
+  <p class="lede">讲解员告诉你这段话是什么意思；导师教你<strong>下一段怎么自己看出来</strong>。这一页只收后者。</p>
+
+  <div class="card principle" style="margin-bottom:26px">
+    <p><b>怎么用：</b>原文页里带「停一下」的旁批，展开后都有一栏「怎么看出来的」，底下挂着一个读法。
+    这里把所有读法收在一起，每条下面自动列出它在哪几回练过——点进去可以回到原文再练一次。</p>
+    <p><b>什么时候算学会：</b>不是能背出这几条，而是读新的一回时，<strong>在旁批展开之前你自己先看出来了</strong>。
+    旁批里「你先写的」和我的解读对得上的次数越来越多，就是在长进。</p>
+    <p class="muted" style="margin:0">标着「通用」的读法，换任何一本书都能用——这是这一页真正的用途。</p>
+  </div>
+
+  <div id="list"><div class="empty">正在汇总各回的读法…</div></div>
+</div>
+
+<script src="assets/js/app.js"></script>
+<script src="data/manifest.js"></script>
+<script src="data/moves.js"></script>
+<script>
+HLM.mountNav('moves.html');
+HLM.guide = HLM.guide || {};
+
+// 扫描全部已写讲解的回目，收集挂了读法的旁批（没有讲解文件的回会加载失败，属正常）
+(function scan() {
+  var left = 120;
+  for (var n = 1; n <= 120; n++) {
+    var s = document.createElement('script');
+    s.src = 'data/guide/ch' + String(n).padStart(3, '0') + '.js';
+    s.onload = s.onerror = function () { if (!--left) draw(); };
+    document.head.appendChild(s);
+  }
+})();
+
+function draw() {
+  var where = {};
+  Object.keys(HLM.guide).map(Number).sort(function (a, b) { return a - b; }).forEach(function (n) {
+    (HLM.guide[n].asides || []).forEach(function (a) {
+      if (!a.move) return;
+      (where[a.move] = where[a.move] || []).push({ n: n, a: a });
+    });
+  });
+  var cn = function (n) { return '第' + HLM.cn(n) + '回'; };
+  document.getElementById('list').innerHTML = HLM.moves.map(function (m) {
+    var w = where[m.id] || [];
+    return '<div class="card mv" id="' + m.id + '">' +
+      '<h3>' + HLM.esc(m.name) + '<span class="tag ' + (m.scope === '通用' ? 'jin' : 'qing') + '">' + m.scope + '</span></h3>' +
+      '<div class="rule">' + HLM.esc(m.rule) + '</div>' +
+      '<dl><dt>怎么做</dt><dd>' + HLM.esc(m.how) + '</dd>' +
+      (m.far ? '<dt>换本书</dt><dd>' + HLM.esc(m.far) + '</dd>' : '') + '</dl>' +
+      '<div class="where">' + (w.length
+        ? w.map(function (x) {
+            return '<a href="reader.html#ch' + x.n + '"><b>' + cn(x.n) + '</b>' +
+              HLM.esc(x.a.stop || x.a.t) + (x.a.practice ? '<em>你来试</em>' : '') + '</a>';
+          }).join('')
+        : '<span class="muted">还没有在已写的回目里用到。</span>') + '</div>' +
+      '</div>';
+  }).join('');
+  if (location.hash) {
+    var el = document.getElementById(location.hash.slice(1));
+    if (el) el.scrollIntoView();
+  }
+}
+</script>
+</body>
+</html>

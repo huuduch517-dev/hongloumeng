@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>人物关系图谱 · 红楼梦研读</title>
+<link rel="stylesheet" href="assets/css/site.css"/>
+<style>
+  .gwrap { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 52px); }
+  .gside { border-right: 1px solid var(--line); overflow-y: auto; padding: 16px; background: var(--paper-2); }
+  .gside h3 { margin: 18px 0 6px; font-size: 12px; letter-spacing: .16em; color: var(--ink-3); font-family: var(--sans); font-weight: 600; }
+  .gside h3:first-child { margin-top: 0; }
+  .gmain { position: relative; overflow: hidden; }
+  #svg { width: 100%; height: 100%; display: block; touch-action: none; background: var(--paper); }
+  .gbar { position: absolute; left: 14px; top: 14px; right: 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; pointer-events: none; }
+  .gbar > * { pointer-events: auto; }
+  .glegend { position: absolute; left: 14px; bottom: 12px; right: 14px; background: color-mix(in srgb, var(--paper) 85%, transparent);
+             backdrop-filter: blur(6px); padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); }
+  input[type=range] { width: 100%; accent-color: var(--zhu); }
+  @media (max-width: 860px) {
+    .gwrap { grid-template-columns: 1fr; height: auto; }
+    .gside { border-right: 0; border-bottom: 1px solid var(--line); }
+    .gmain { height: 70vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="gwrap">
+  <aside class="gside">
+    <h3>看哪几层关系</h3>
+    <div id="layerBox"></div>
+
+    <h3>读到第几回</h3>
+    <input type="range" id="upto" min="1" max="120" value="120"/>
+    <div class="muted sans" style="font-size:12px" id="uptoLab">全书</div>
+    <div class="muted" style="font-size:11.5px;margin-top:4px">
+      往回拖，只显示当时已登场的人 —— 既能看关系怎么长出来，也能防剧透。
+    </div>
+
+    <h3>显示到哪一级</h3>
+    <select id="rankSel">
+      <option value="1">只看核心人物</option>
+      <option value="2">核心 + 重要</option>
+      <option value="3" selected>全部</option>
+    </select>
+
+    <h3>布局</h3>
+    <div style="display:flex;gap:6px">
+      <button class="btn sm pri" data-mode="force">关系网</button>
+      <button class="btn sm" data-mode="tree">族谱树</button>
+      <button class="btn sm" id="fitBtn">回正</button>
+    </div>
+
+    <h3>找人</h3>
+    <input type="search" id="q" placeholder="输入姓名或别号…"/>
+    <div id="qOut" style="margin-top:6px"></div>
+
+    <h3>两人之间是什么关系</h3>
+    <select id="pa"></select>
+    <div style="height:6px"></div>
+    <select id="pb"></select>
+    <div style="height:8px"></div>
+    <button class="btn sm pri" id="pathBtn" style="width:100%">查最短关系链</button>
+    <div id="pathOut" style="margin-top:8px"></div>
+
+    <h3>怎么用</h3>
+    <div class="muted" style="font-size:12px;line-height:1.8">
+      点节点看人物卡并写批注 · 拖节点可调整位置 · 滚轮缩放 · 拖空白处平移 ·
+      点空白取消高亮
+    </div>
+  </aside>
+
+  <div class="gmain">
+    <svg id="svg"></svg>
+    <div class="gbar">
+      <span class="tag sans" id="gStat">载入中…</span>
+    </div>
+    <div class="glegend scrollx"><div id="legend" style="white-space:nowrap"></div></div>
+  </div>
+</div>
+
+<div class="drawer" id="drawer">
+  <div class="dh">
+    <b class="sans" style="font-size:13px;letter-spacing:.1em">人 物 卡</b>
+    <button class="iconbtn" id="closeDrawer">✕</button>
+  </div>
+  <div class="db" id="drawerBody"></div>
+</div>
+
+<script src="assets/js/app.js"></script>
+<script src="data/manifest.js"></script>
+<script src="data/people.js"></script>
+<script src="data/relations.js"></script>
+<script src="assets/js/graph.js"></script>
+<script>
+  HLM.mountNav('graph.html');
+  initGraph();
+</script>
+</body>
+</html>

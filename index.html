@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>红楼梦研读</title>
+<link rel="stylesheet" href="assets/css/site.css"/>
+<style>
+  .hero { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: start; margin-bottom: 8px; }
+  .hero img { width: 100%; border-radius: 8px; box-shadow: var(--shadow); }
+  .entry { display: block; padding: 18px 20px; height: 100%; }
+  .entry:hover { text-decoration: none; border-color: var(--line-2); transform: translateY(-2px); }
+  .entry { transition: .18s; }
+  .entry b { display: block; font-size: 17px; color: var(--ink); margin-bottom: 5px; }
+  .entry span { font-size: 13px; color: var(--ink-2); line-height: 1.75; }
+  @media (max-width: 700px) { .hero { grid-template-columns: 1fr; } .hero img { max-width: 160px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" style="margin:12px 0 0;border-left:3px solid var(--zhu)"><b>演示版</b>：这里只放了第 1–7 回（已做成“导师模式”的部分），用来展示网站的结构。原文和脂砚斋批语照录；出版社版本的注释没有放进来。讲解、白话译文、词条库、读法库和“欧丽娟怎么读”都是这个项目自己写的。</div>
+
+  <div class="hero">
+    <div>
+      <h1 style="margin-top:0">红楼梦 · 研读工作台</h1>
+      <p class="lede" id="ed"></p>
+      <div class="grid c4" style="margin:20px 0">
+        <div class="card stat"><b id="s1">—</b><span>回</span></div>
+        <div class="card stat"><b id="s2">—</b><span>正文字数</span></div>
+        <div class="card stat"><b id="s3">—</b><span>脂砚斋批语</span></div>
+        <div class="card stat"><b id="s4">—</b><span>人物 · 关系</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>先看这一条</h2>
+  <div class="card" style="border-left:3px solid var(--zhu)">
+    <p style="margin-top:0"><b>脂批在第八十回戛然而止。</b>本书前八十回带有 <span id="z80">—</span> 条脂砚斋批语，
+    而第八十一至一百二十回是 <b>0 条</b>。</p>
+    <p style="margin-bottom:0">这不是排版疏漏，是版本事实：后四十回并非曹雪芹原稿，脂砚斋没有批过。
+    这条硬证据会贯穿整个研读——读到第八十回之后，你会明显感到人物说话的方式变了、
+    伏笔开始接不上。带着这个认识去读，比听任何人下结论都有用。</p>
+  </div>
+
+  <h2>从这里进去</h2>
+  <div class="grid c2">
+    <a class="card entry" href="reader.html">
+      <b>原文 · 一百二十回</b>
+      <span>脂本精校全文。脂批与注释可一键开关、就地展开；生僻缺字以原书字形显示；
+      任意一段都能点开写批注，本地保存。</span>
+    </a>
+    <a class="card entry" href="graph.html">
+      <b>人物关系图谱</b>
+      <span>六层关系可自由叠加：世系、联姻、派系、主仆、情感、命运。
+      能拖"读到第几回"看关系怎么长出来，也能查任意两人之间的最短关系链。</span>
+    </a>
+    <a class="card entry" href="people.html">
+      <b>人物志</b>
+      <span>每个人一份档案：出身、在权力结构里的坐标、判词、结局，
+      以及——这个人的处境决定了他必须怎么做。</span>
+    </a>
+    <a class="card entry" href="notes.html">
+      <b>我的笔记</b>
+      <span>你写在各处的批注汇总在这里，可导出 Markdown 或 JSON。
+      导出后发给我，我据此修订解读。</span>
+    </a>
+  </div>
+
+  <h2>这本书打算怎么读</h2>
+  <div class="card">
+    <p style="margin-top:0"><b>主线：人情世故与权力博弈。</b>把它当一部中国式组织政治的教科书来读——
+    谁在算计谁、话里有话、坐次称呼里的权力信号、结构性的处境（不忙着评判人品，先问这个位置上的人还能怎么活）。</p>
+    <p>但只盯博弈会把书读窄。曹雪芹写吃穿用度、少女拌嘴、一个丫头怎么想事，篇幅远大于勾心斗角；
+    而且<b>不懂生活层面，权力细节根本看不出来</b>——不知道月钱多少，就不懂第三回那场对话有多凶险。
+    所以另有四条副线：<b>人物性格、生活层面、人生意义、对人性的思考</b>。</p>
+    <p style="margin-bottom:0">这六个方向落到原文里，就是段间旁批的八种类型：</p>
+    <div class="scrollx" style="margin-top:12px">
+    <table>
+      <tr><th>类型</th><th>解决什么</th></tr>
+      <tr><td><span class="tag" style="color:var(--k-yin);border-color:var(--k-yin)">弦外之音</span></td><td>这句话真正在说什么　<span class="muted">（主线）</span></td></tr>
+      <tr><td><span class="tag" style="color:var(--k-quan);border-color:var(--k-quan)">权力信号</span></td><td>坐次、称呼、赏赐、谁替谁说话　<span class="muted">（主线）</span></td></tr>
+      <tr><td><span class="tag" style="color:var(--k-bai);border-color:var(--k-bai)">白话</span></td><td>难懂的长段转成现代话</td></tr>
+      <tr><td><span class="tag" style="color:var(--k-bg);border-color:var(--k-bg)">背景</span></td><td>制度、器物、习俗、称谓、钱</td></tr>
+      <tr><td><span class="tag" style="color:var(--k-xing);border-color:var(--k-xing)">性格</span></td><td>这个人为什么会这么反应</td></tr>
+      <tr><td><span class="tag" style="color:var(--k-huo);border-color:var(--k-huo)">生活</span></td><td>他们具体怎么过日子</td></tr>
+      <tr><td><span class="tag" style="color:var(--k-si);border-color:var(--k-si)">人生</span></td><td>曹雪芹在这里究竟问了什么</td></tr>
+      <tr><td><span class="tag" style="color:var(--k-fo);border-color:var(--k-fo)">佛与命</span></td><td>色空、无常、因果、还债　<a href="fo.html">→ 总论</a></td></tr>
+      <tr><td><span class="tag" style="color:var(--k-fu);border-color:var(--k-fu)">伏笔</span></td><td>草蛇灰线，结合脂批</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <h2>怎么解决"读不动"</h2>
+  <div class="card">
+    <p style="margin-top:0">实测：这本书<b>段落长度中位数 326 字</b>，最长一段 1468 字，超过 300 字的长段有 1272 个。
+    清代白话本身绕，又没有现代分段——光看原文很容易撑不住。三个办法：</p>
+    <ul style="margin:0;padding-left:1.4em;line-height:2">
+      <li><b>逐段现代文译文</b>：每个散文段末尾有个绿色「译」小标，平时不显示内容，点一下就地展开。
+      贴着原文直译——一句对一句，只换难懂的词，保留原有称谓和语序，你想学原文时不会被译文带跑</li>
+      <li><b>每回配"读前导读 + 读后小结"</b>：进去之前先给地图，出来之后收一收，还附诸家异说与三个思考题</li>
+      <li><b>诗词全部白话翻译并解读</b>：全书 309 个诗词块、782 行。判词、灯谜、菊花诗都是命运密码，不译等于跳过</li>
+      <li><b>难词自动标注</b>：月钱、分例、通房丫头、教引嬷嬷、碧纱幮……点一下就出释义，每回只标首次出现</li>
+    </ul>
+    <p class="muted" style="font-size:12.5px;margin:12px 0 0">
+      顶栏有「讲解 / 全译 / 词条 / 脂批 / 注释」五个开关，可以随时关掉任何一层只读白文。
+    </p>
+  </div>
+
+  <h2>进度</h2>
+  <div class="scrollx">
+  <table>
+    <tr><th>阶段</th><th>内容</th><th>状态</th></tr>
+    <tr><td>骨架</td><td>数据管道 · 原文阅读器 · 关系图谱 · 人物库 · 批注系统</td><td><span class="tag" style="color:var(--lv);border-color:var(--lv)">已完成</span></td></tr>
+    <tr><td>讲解层</td><td>词条库 143 条 · 第 1–84 回导读／旁批 1080 条／诗词全译 226 首／小结</td><td><span class="tag" style="color:var(--lv);border-color:var(--lv)">已完成</span></td></tr>
+    <tr><td>译文层</td><td>第 1–84 回逐段现代文译文（1618 段全覆盖）</td><td><span class="tag" style="color:var(--lv);border-color:var(--lv)">已完成</span></td></tr>
+    <tr><td>佛与命</td><td><a href="fo.html">总论一篇</a> + 57 条随文旁批</td><td><span class="tag" style="color:var(--lv);border-color:var(--lv)">已完成</span></td></tr>
+    <tr><td>逐回</td><td>第 85–120 回讲解与译文</td><td><span class="tag jin">进行中</span></td></tr>
+    <tr><td>专题</td><td>贾府权力结构、凤姐的管理术、抄检大观园复盘、经济账、后四十回问题等 15 篇</td><td><span class="tag">待做</span></td></tr>
+  </table>
+  </div>
+
+  <p class="muted" style="font-size:12px;margin-top:36px">
+    底本为果麦经典版，其校勘、脂批选编与注释均有编者著作权。本站为个人研读用的本地工具，请勿公开发布。
+  </p>
+</div>
+
+<script src="assets/js/app.js"></script>
+<script src="data/manifest.js"></script>
+<script src="data/people.js"></script>
+<script src="data/relations.js"></script>
+<script>
+  HLM.mountNav('index.html');
+  var M = HLM.manifest;
+  var chars = M.reduce(function(s,m){return s+m.chars;},0);
+  var zhi   = M.reduce(function(s,m){return s+m.zhi;},0);
+  var z80   = M.filter(function(m){return m.n<=80;}).reduce(function(s,m){return s+m.zhi;},0);
+  var np    = HLM.people.length + (HLM.extraPeople||[]).length;
+  document.getElementById('ed').textContent =
+    HLM.meta.author + ' 著 · ' + HLM.meta.cont + ' · ' + HLM.meta.commentator + '　|　' + HLM.meta.edition;
+  document.getElementById('s1').textContent = M.length;
+  document.getElementById('s2').textContent = (chars/10000).toFixed(1) + '万';
+  document.getElementById('s3').textContent = zhi;
+  document.getElementById('s4').textContent = np + ' · ' + HLM.relations.length;
+  document.getElementById('z80').textContent = z80;
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>人物志 · 红楼梦研读</title>
+<link rel="stylesheet" href="assets/css/site.css"/>
+<style>
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 0 22px; }
+  .chip { font-family: var(--sans); font-size: 12.5px; padding: 5px 12px; border-radius: 20px; cursor: pointer;
+          border: 1px solid var(--line); background: var(--paper-2); color: var(--ink-2); }
+  .chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .pc { padding: 14px 16px; cursor: pointer; transition: .16s; }
+  .pc:hover { border-color: var(--line-2); transform: translateY(-2px); }
+  .pc .nm { font-size: 17px; font-weight: 700; }
+  .pc .al { font-family: var(--sans); font-size: 11px; color: var(--ink-3); }
+  .pc .bf { font-size: 13px; color: var(--ink-2); line-height: 1.7; margin-top: 8px;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>人物志</h1>
+  <p class="lede">不忙着评判人品，先看这个位置上的人还能怎么活。</p>
+
+  <input type="search" id="q" placeholder="搜姓名、别号，或搜解读里的字句（如「权力」「庶出」「站队」）"/>
+  <div class="filters" id="filters"></div>
+  <div class="muted sans" style="font-size:12px;margin-bottom:12px" id="cnt"></div>
+  <div class="grid c3" id="list"></div>
+</div>
+
+<div class="drawer" id="drawer">
+  <div class="dh"><b class="sans" style="font-size:13px;letter-spacing:.1em">人 物 卡</b>
+  <button class="iconbtn" id="closeDrawer">✕</button></div>
+  <div class="db" id="drawerBody"></div>
+</div>
+
+<script src="assets/js/app.js"></script>
+<script src="data/manifest.js"></script>
+<script src="data/people.js"></script>
+<script src="data/relations.js"></script>
+<script>
+HLM.mountNav('people.html');
+var ALL = HLM.people.concat(HLM.extraPeople || []);
+var BY = {}; ALL.forEach(function(p){ BY[p.id]=p; });
+var HOUSE = {rong:'荣国府',ning:'宁国府',lin:'林家',shi:'史家',wang:'王家',xue:'薛家',you:'尤家',clergy:'方外',out:'府外'};
+var ROLE  = {master:'主子',concubine:'姨娘',maid:'丫鬟',servant:'仆役',outsider:'外人',clergy:'僧道',actor:'伶人',official:'官场'};
+var F = { house:'', role:'', rank:0 };
+
+var FILTERS = [
+  ['rank', 1, '核心人物'],
+  ['house','rong','荣国府'], ['house','ning','宁国府'],
+  ['house','xue','薛家'], ['house','lin','林家'],
+  ['role','master','主子'], ['role','maid','丫鬟'],
+  ['role','servant','仆役'], ['role','clergy','僧道'], ['role','official','官场']
+];
+document.getElementById('filters').innerHTML =
+  '<span class="chip on" data-k="" data-v="">全部</span>' +
+  FILTERS.map(function(f){ return '<span class="chip" data-k="'+f[0]+'" data-v="'+f[1]+'">'+f[2]+'</span>'; }).join('');
+
+document.querySelectorAll('.chip').forEach(function(c){
+  c.onclick = function(){
+    document.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');});
+    c.classList.add('on');
+    F = { house:'', role:'', rank:0 };
+    if (c.dataset.k) F[c.dataset.k] = c.dataset.k === 'rank' ? +c.dataset.v : c.dataset.v;
+    draw();
+  };
+});
+document.getElementById('q').oninput = draw;
+
+function draw(){
+  var q = document.getElementById('q').value.trim();
+  var list = ALL.filter(function(p){
+    if (F.house && p.house !== F.house) return false;
+    if (F.role  && p.role  !== F.role)  return false;
+    if (F.rank  && p.rank  !== F.rank)  return false;
+    if (!q) return true;
+    var hay = [p.name, (p.alias||[]).join(''), p.brief, p.power, p.read, p.verdict, p.fate].join(' ');
+    return hay.indexOf(q) >= 0;
+  }).sort(function(a,b){ return a.rank - b.rank || (a.debut||999) - (b.debut||999); });
+
+  document.getElementById('cnt').textContent = list.length + ' 位';
+  document.getElementById('list').innerHTML = list.map(function(p){
+    return '<div class="card pc" data-id="'+p.id+'">' +
+      '<div class="nm">'+HLM.esc(p.name)+'</div>' +
+      (p.alias ? '<div class="al">'+p.alias.map(HLM.esc).join(' · ')+'</div>' : '') +
+      '<div style="margin-top:7px">' +
+        (p.ce ? '<span class="tag jin">'+p.ce+'</span> ' : '') +
+        '<span class="tag">'+(HOUSE[p.house]||p.house)+'</span> ' +
+        '<span class="tag">'+(ROLE[p.role]||p.role)+'</span>' +
+      '</div>' +
+      (p.brief ? '<div class="bf">'+HLM.esc(p.brief)+'</div>' : '') +
+      '</div>';
+  }).join('') || '<div class="empty">没有匹配的人物</div>';
+
+  document.querySelectorAll('.pc').forEach(function(c){
+    c.onclick = function(){ card(BY[c.dataset.id]); };
+  });
+}
+
+function card(p){
+  var rels = HLM.relations.filter(function(e){ return e.a===p.id || e.b===p.id; });
+  var k = 'person:'+p.id, note = HLM.notes.get(k);
+  document.getElementById('drawerBody').innerHTML =
+    '<h2 style="margin:0 0 4px;border:0;padding:0;font-size:24px">'+HLM.esc(p.name)+'</h2>' +
+    (p.alias ? '<div class="muted sans" style="font-size:12px;margin-bottom:10px">'+p.alias.map(HLM.esc).join(' · ')+'</div>' : '') +
+    '<div style="margin:10px 0 14px">' +
+      (p.ce ? '<span class="tag jin">'+p.ce+'</span> ' : '') +
+      '<span class="tag">'+(HOUSE[p.house]||p.house)+'</span> ' +
+      '<span class="tag">'+(ROLE[p.role]||p.role)+'</span> ' +
+      (p.debut ? '<span class="tag">第'+HLM.cn(p.debut)+'回登场</span> ' : '') +
+      '<span class="tag">'+rels.length+' 条关系</span></div>' +
+    (p.verdict ? '<div class="huiqianmo"><div class="hd">判　词</div>'+HLM.esc(p.verdict)+'</div>' : '') +
+    (p.brief ? '<p>'+HLM.esc(p.brief)+'</p>' : '') +
+    (p.power ? '<h3>在权力结构中的位置</h3><p>'+HLM.esc(p.power)+'</p>' : '') +
+    (p.read  ? '<h3>怎么读这个人</h3><p>'+HLM.esc(p.read)+'</p>' : '') +
+    (p.fate  ? '<h3>结局</h3><p>'+HLM.esc(p.fate)+'</p>' : '') +
+    (p.key && p.key.length ? '<h3>关键场景</h3>' + p.key.map(function(x){
+      return '<div style="padding:4px 0"><a href="reader.html#ch'+x.n+'" class="sans" style="font-size:12px">第'+HLM.cn(x.n)+'回</a> '+HLM.esc(x.t)+'</div>';
+    }).join('') : '') +
+    '<h3>关系</h3>' + rels.map(function(e){
+      var o = BY[e.a===p.id ? e.b : e.a]; if(!o) return '';
+      return '<div style="padding:5px 0;border-bottom:1px solid var(--line)"><b>'+HLM.esc(o.name)+'</b> <span class="tag">'+HLM.esc(e.l)+'</span></div>';
+    }).join('') +
+    '<h3>我的批注</h3>' +
+    '<textarea id="pNote" placeholder="写下你对'+HLM.esc(p.name)+'的看法…">'+HLM.esc(note?note.text:'')+'</textarea>' +
+    '<div class="muted sans" style="font-size:11px;margin-top:6px" id="hint">'+(note?'上次保存 '+note.at:'')+'</div>' +
+    '<div style="margin-top:14px"><a href="graph.html" class="btn sm">在关系图谱中查看 →</a></div>';
+  document.getElementById('drawer').classList.add('open');
+  var ta = document.getElementById('pNote'), t;
+  ta.oninput = function(){
+    clearTimeout(t);
+    t = setTimeout(function(){
+      var n = HLM.notes.set(k, ta.value, {section:'人物 · '+p.name, ref:p.name});
+      document.getElementById('hint').textContent = n ? '已保存 '+n.at : '已清空';
+    }, 500);
+  };
+}
+document.getElementById('closeDrawer').onclick = function(){ document.getElementById('drawer').classList.remove('open'); };
+draw();
+</script>
+</body>
+</html>

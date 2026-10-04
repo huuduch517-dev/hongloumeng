@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>欧丽娟怎么读 · 红楼梦研读</title>
+<link rel="stylesheet" href="assets/css/site.css"/>
+<style>
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 18px; }
+  .tabs button { font-family: var(--sans); font-size: 13px; padding: 5px 14px; border-radius: 999px;
+    border: 1px solid var(--line-2); background: transparent; color: var(--ink-2); cursor: pointer; }
+  .tabs button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .grp { margin-bottom: 22px; }
+  .grp > h3 { font-size: 15px; margin: 0 0 8px; color: var(--ink); display: flex; align-items: baseline; gap: 10px; }
+  .grp > h3 a { font-family: var(--sans); font-size: 12px; font-weight: 400; }
+  .grp .card { padding: 4px 18px 10px; font-size: 14.5px; line-height: 1.9; color: var(--ink-2); }
+  .lec { display: grid; grid-template-columns: 3.2em 1fr auto; gap: 4px 10px; align-items: baseline;
+    padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .lec .no { font-family: var(--sans); font-size: 12px; color: var(--ink-3); }
+  .lec .st { font-family: var(--sans); font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+  .lec .st.on { color: var(--lv); }
+  .lec a { color: var(--ink); }
+  .gap { padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--ink-3); }
+  .principle { font-size: 14.5px; line-height: 1.9; }
+  .principle p { margin: 0 0 .7em; }
+</style>
+</head>
+<body>
+<div class="wrap narrow">
+  <h1>欧丽娟怎么读</h1>
+  <p class="lede">台大欧丽娟教授的《红楼梦》课，按回、按人物拆成一段一段，每段附时间点，可以直接去听那几分钟。</p>
+
+  <div class="card principle" style="margin-bottom:22px">
+    <p><b>顺序：</b>先读原文，做完那一回的提问，<strong>再</strong>来听她。先有自己的看法，再听高手怎么读，才知道差在哪儿。原文页每回最后也有「欧丽娟怎么读」，默认收起。</p>
+    <p><b>每一段有三样：</b>她这几分钟讲了什么（我的转述，不是原话）；和本站的读法比，哪里一样、哪里不一样；最后问你站谁——写下来，导出笔记时会一起带给我。</p>
+    <p class="muted" style="margin:0">她的课按专题和人物讲，不按回目。转写是本机机器转写，专名以原书为准；凡她引的原文，我都回本站底本核过，核不上的会注明。</p>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button data-v="ch" class="on">按回</button>
+    <button data-v="who">按人物</button>
+    <button data-v="lec">全部讲次</button>
+  </div>
+  <div id="list"></div>
+</div>
+
+<script src="assets/js/app.js"></script>
+<script src="data/manifest.js"></script>
+<script src="data/olj.js"></script>
+<script>
+HLM.mountNav('olj.html');
+var O = HLM.olj, view = 'ch';
+try { view = localStorage.getItem('hlm.olj.view') || 'ch'; } catch (e) {}
+
+function itemHTML(it) {
+  return '<div class="oli">' + HLM.oljHead(it) +
+    '<div class="olb">' + HLM.para(it.she) + '</div>' +
+    (it.vs ? '<div class="olvs"><div class="hh">和本站的读法比</div>' + HLM.para(it.vs) + '</div>' : '') +
+    (it.ask ? '<div class="olask"><b>你站谁？</b>' + HLM.mdBold(HLM.esc(it.ask)) +
+      (HLM.notes.get('olj:' + it.id) ? '<div class="muted" style="font-size:12.5px;margin-top:4px">✎ 你写过：' +
+        HLM.esc(HLM.notes.get('olj:' + it.id).text) + '</div>' : '') + '</div>' : '') +
+    '</div>';
+}
+function group(keyFn, label, link) {
+  var g = {}, order = [];
+  O.items.forEach(function (it) {
+    [].concat(keyFn(it)).forEach(function (k) {
+      if (!g[k]) { g[k] = []; order.push(k); }
+      g[k].push(it);
+    });
+  });
+  order.sort(function (a, b) { return (typeof a === 'number') ? a - b : 0; });
+  if (!order.length) return '<div class="empty">第一批讲次还在转写整理中。</div>';
+  return order.map(function (k) {
+    return '<div class="grp"><h3>' + label(k) + (link ? link(k) : '') + '</h3><div class="card">' +
+      g[k].map(itemHTML).join('') + '</div></div>';
+  }).join('');
+}
+function lecList() {
+  var cnt = {};
+  O.items.forEach(function (it) { cnt[it.lec] = (cnt[it.lec] || 0) + 1; });
+  return '<div class="card" style="padding:4px 18px">' + O.lectures.map(function (l) {
+    var row = '<div class="lec"><span class="no">第' + l[0] + '讲</span>' +
+      '<a target="_blank" rel="noopener" href="' + HLM.oljURL(l[0]) + '">' + HLM.esc(l[2]) + '</a>' +
+      '<span class="st' + (cnt[l[0]] ? ' on' : '') + '">' + l[3] + ' 分钟' + (cnt[l[0]] ? ' · 已整理 ' + cnt[l[0]] + ' 段' : '') + '</span></div>';
+    return (l[0] === 20 ? '<div class="gap">第19讲：这个合集里缺失（从这里起，B 站分 P 号比讲号小 1）</div>' : '') + row;
+  }).join('') + '</div>';
+}
+function draw() {
+  document.querySelectorAll('#tabs button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === view); });
+  var el = document.getElementById('list');
+  if (view === 'ch') el.innerHTML = group(function (it) { return it.ch; },
+    function (n) { return '第' + HLM.cn(n) + '回'; },
+    function (n) { return '<a href="reader.html#ch' + n + '">读原文 →</a>'; });
+  else if (view === 'who') el.innerHTML = group(function (it) { return it.who && it.who.length ? it.who : ['总论']; },
+    function (w) { return HLM.esc(w); });
+  else el.innerHTML = lecList();
+}
+document.getElementById('tabs').onclick = function (e) {
+  var v = e.target.dataset && e.target.dataset.v;
+  if (!v) return;
+  view = v;
+  try { localStorage.setItem('hlm.olj.view', v); } catch (e2) {}
+  draw();
+};
+draw();
+</script>
+</body>
+</html>

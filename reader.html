@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>原文 · 红楼梦研读</title>
+<link rel="stylesheet" href="assets/css/site.css"/>
+<style>
+  .rwrap { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 52px); }
+  .rside { border-right: 1px solid var(--line); background: var(--paper-2); display: flex; flex-direction: column; }
+  .rside .sq { padding: 12px; border-bottom: 1px solid var(--line); }
+  #toc { overflow-y: auto; flex: 1; }
+  .tocitem { display: block; padding: 9px 14px; border-bottom: 1px solid var(--line); color: var(--ink-2); }
+  .tocitem:hover { background: var(--paper-3); text-decoration: none; }
+  .tocitem.on { background: color-mix(in srgb, var(--zhu) 9%, transparent); border-left: 3px solid var(--zhu); }
+  .tocitem b { display: block; font-size: 13px; font-family: var(--sans); color: var(--ink); }
+  .tocitem span { display: block; font-size: 12.5px; line-height: 1.6; }
+  .tocitem em { display: block; font-size: 10.5px; font-style: normal; color: var(--ink-3); font-family: var(--sans); margin-top: 2px; }
+
+  .rmain { display: flex; flex-direction: column; overflow: hidden; }
+  .rbar { display: flex; gap: 6px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  #scroller { overflow-y: auto; flex: 1; }
+  #body { max-width: 720px; margin: 0 auto; padding: 34px 26px 120px; line-height: 2.05; }
+
+  .chead { text-align: center; margin-bottom: 40px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .chead .cno { font-family: var(--sans); font-size: 12px; letter-spacing: .3em; color: var(--zhu); }
+  .chead h1 { font-size: 21px; font-weight: 400; letter-spacing: .1em; line-height: 1.9; margin: 10px 0 8px; }
+  .chead .cmeta { font-family: var(--sans); font-size: 11px; color: var(--ink-3); }
+
+  #body [data-p] { cursor: text; border-radius: 4px; transition: background .15s; }
+  #body [data-p]:hover { background: color-mix(in srgb, var(--jin) 6%, transparent); }
+  #body [data-p].hasnote { background: color-mix(in srgb, var(--jin) 12%, transparent); box-shadow: inset 3px 0 0 var(--jin); padding-left: 8px; }
+
+  @media (max-width: 860px) {
+    .rwrap { grid-template-columns: 1fr; }
+    .rside { position: fixed; inset: 52px auto 0 0; width: 88vw; max-width: 340px; z-index: 150;
+             transform: translateX(-101%); transition: transform .25s; box-shadow: var(--shadow); }
+    .rside.show { transform: none; }
+    #body { padding: 24px 16px 100px; }
+  }
+  @media (min-width: 861px) { #tocBtn { display: none; } }
+  .densesel { width: auto; padding: 5px 8px; font-size: 12px; border-radius: 8px; }
+  .densesel:disabled { opacity: .4; }
+</style>
+</head>
+<body>
+
+<div class="rwrap">
+  <aside class="rside" id="side">
+    <div class="sq"><input type="search" id="tocQ" placeholder="搜回目…（如「葬花」「凤姐」「27」）"/></div>
+    <div id="toc"></div>
+  </aside>
+
+  <div class="rmain">
+    <div class="rbar">
+      <button class="iconbtn" id="tocBtn" title="目录">☰</button>
+      <button class="btn sm" id="prev">← 上一回</button>
+      <button class="btn sm" id="next">下一回 →</button>
+      <span style="flex:1"></span>
+      <button class="btn sm" id="guideBtn" title="显示/隐藏导读、旁批、诗词译文与小结">讲解</button>
+      <button class="btn sm" id="mentorBtn" title="导师模式：先指一句、问一个问题，展开才是解读。关掉则直接显示解读">导师</button>
+      <select id="denseSel" class="densesel" title="旁批密度">
+        <option value="all">全部旁批</option>
+        <option value="core">只看重点</option>
+      </select>
+      <button class="btn sm" id="trBtn" title="一次展开本回全部现代文译文（平时点段末的「译」逐段看）">全译</button>
+      <button class="btn sm" id="lexBtn" title="难词虚线标注，点击看释义">词条</button>
+      <button class="btn sm" id="zhiBtn" title="显示/隐藏脂砚斋批语">脂批</button>
+      <button class="btn sm" id="noteBtn" title="显示/隐藏编者注释">注释</button>
+      <button class="iconbtn" id="fsDn" title="缩小字号">A-</button>
+      <button class="iconbtn" id="fsUp" title="放大字号">A+</button>
+      <span class="tag jin" id="myCount"></span>
+    </div>
+    <div id="scroller"><div id="body" class="zhengwen"></div></div>
+  </div>
+</div>
+
+<div id="lexPop"></div>
+
+<div class="drawer" id="drawer">
+  <div class="dh">
+    <b class="sans" style="font-size:13px;letter-spacing:.1em">我 的 批 注</b>
+    <button class="iconbtn" id="closeDrawer">✕</button>
+  </div>
+  <div class="db" id="drawerBody"></div>
+</div>
+
+<script src="assets/js/app.js"></script>
+<script src="data/manifest.js"></script>
+<script src="data/lexicon.js"></script>
+<script src="data/moves.js"></script>
+<script src="data/olj.js"></script>
+<script src="assets/js/reader.js"></script>
+<script>
+  HLM.mountNav('reader.html');
+  initReader();
+</script>
+</body>
+</html>

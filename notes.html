@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>我的笔记 · 红楼梦研读</title>
+<link rel="stylesheet" href="assets/css/site.css"/>
+<style>
+  .note { border-left: 3px solid var(--jin); padding: 12px 16px; margin-bottom: 14px; background: var(--paper-2);
+          border-radius: 0 8px 8px 0; border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .note .q { font-size: 13px; color: var(--ink-3); border-left: 2px solid var(--line-2); padding-left: 10px; margin-bottom: 8px; }
+  .note .t { white-space: pre-wrap; line-height: 1.85; }
+  .note .m { font-family: var(--sans); font-size: 11px; color: var(--ink-3); margin-top: 8px; display: flex; gap: 10px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="wrap narrow">
+  <h1>我的笔记</h1>
+  <p class="lede" id="lede"></p>
+
+  <div class="card" style="margin-bottom:24px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn pri" id="expMD">导出 Markdown</button>
+      <button class="btn" id="expJSON">导出 JSON（可再导入）</button>
+      <button class="btn" id="impBtn">导入 JSON</button>
+      <input type="file" id="impFile" accept=".json" style="display:none"/>
+    </div>
+    <p class="muted" style="font-size:12.5px;margin:12px 0 0">
+      把导出的 Markdown 发给我，我会逐条读你的批注，据此修订解读——你不同意的地方我会正面回应，
+      不会只挑好听的说。这就是"结合你的观念和思考"落地的方式。
+    </p>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<script src="assets/js/app.js"></script>
+<script src="data/manifest.js"></script>
+<script>
+HLM.mountNav('notes.html');
+
+function draw() {
+  var all = HLM.notes.all();
+  var keys = Object.keys(all).sort(HLM.notes._cmpKey);
+  document.getElementById('lede').textContent =
+    keys.length ? '共 ' + keys.length + ' 条，按回目顺序排列。' : '还没有批注。';
+  if (!keys.length) {
+    document.getElementById('list').innerHTML =
+      '<div class="empty">去 <a href="reader.html">原文</a> 里点任意一段，或在 <a href="graph.html">关系图谱</a> 里点开人物卡，就能写下第一条。</div>';
+    return;
+  }
+  var html = '', lastSec = '';
+  keys.forEach(function (k) {
+    var n = all[k], sec = n.section || '其他';
+    if (sec !== lastSec) { html += '<h2>' + HLM.esc(sec) + '</h2>'; lastSec = sec; }
+    var jump = '';
+    var m = k.match(/^ch:(\d+)/);
+    if (m) jump = '<a href="reader.html#ch' + m[1] + '">回到原文</a>';
+    else if (k.indexOf('person:') === 0) jump = '<a href="graph.html">回到图谱</a>';
+    html += '<div class="note">' +
+      (n.quote ? '<div class="q">' + HLM.esc(n.quote) + '</div>' : '') +
+      '<div class="t">' + HLM.esc(n.text) + '</div>' +
+      '<div class="m"><span>' + n.at + '</span>' + jump +
+      '<span style="flex:1"></span><a href="#" data-del="' + HLM.esc(k) + '">删除</a></div></div>';
+  });
+  document.getElementById('list').innerHTML = html;
+  document.querySelectorAll('[data-del]').forEach(function (a) {
+    a.onclick = function (ev) {
+      ev.preventDefault();
+      if (!confirm('删除这条批注？')) return;
+      HLM.notes.set(a.dataset.del, ''); draw();
+    };
+  });
+}
+
+document.getElementById('expMD').onclick = function () {
+  HLM.notes.download('红楼梦批注_' + new Date().toISOString().slice(0,10) + '.md', HLM.notes.exportMD(), 'text/markdown');
+};
+document.getElementById('expJSON').onclick = function () {
+  HLM.notes.download('红楼梦批注_' + new Date().toISOString().slice(0,10) + '.json', HLM.notes.exportJSON(), 'application/json');
+};
+document.getElementById('impBtn').onclick = function () { document.getElementById('impFile').click(); };
+document.getElementById('impFile').onchange = function (ev) {
+  var f = ev.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function () {
+    try { alert('导入 ' + HLM.notes.importJSON(r.result) + ' 条'); draw(); }
+    catch (e) { alert('导入失败：文件格式不对'); }
+  };
+  r.readAsText(f);
+};
+draw();
+</script>
+</body>
+</html>

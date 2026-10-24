@@ -69,7 +69,7 @@
       if (--left) return;
       if (failedText || !H.text[n]) {
         document.getElementById('body').innerHTML =
-          (n > 7 ? '<div class="empty">演示版只收第 1–7 回。<br><small>完整的 120 回在本地版里。</small></div>' : '<div class="empty">第 ' + n + ' 回原文没能载入。<br><small>若是双击打开的本地文件，' +
+          (n > 8 ? '<div class="empty">演示版只收第 1–8 回。<br><small>完整的 120 回在本地版里。</small></div>' : '<div class="empty">第 ' + n + ' 回原文没能载入。<br><small>若是双击打开的本地文件，' +
           '个别浏览器会拦截同目录脚本；可在本目录运行 <code>python -m http.server</code> 后访问。</small></div>');
         return;
       }

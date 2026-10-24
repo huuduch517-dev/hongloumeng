@@ -6,8 +6,11 @@
 <title>原文 · 红楼梦研读</title>
 <link rel="stylesheet" href="assets/css/site.css"/>
 <style>
-  .rwrap { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 52px); }
-  .rside { border-right: 1px solid var(--line); background: var(--paper-2); display: flex; flex-direction: column; }
+  /* 阅读区锁在一屏之内，只让目录（#toc）和正文（#scroller）各自滚动。
+     grid 的行和两栏都要 min-height:0，否则 120 回目录会把整行撑高，正文滚到“底”还差一大截。 */
+  .rwrap { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: minmax(0, 1fr);
+           height: calc(100vh - 52px); height: calc(100dvh - 52px); }
+  .rside { border-right: 1px solid var(--line); background: var(--paper-2); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
   .rside .sq { padding: 12px; border-bottom: 1px solid var(--line); }
   #toc { overflow-y: auto; flex: 1; }
   .tocitem { display: block; padding: 9px 14px; border-bottom: 1px solid var(--line); color: var(--ink-2); }
@@ -17,9 +20,9 @@
   .tocitem span { display: block; font-size: 12.5px; line-height: 1.6; }
   .tocitem em { display: block; font-size: 10.5px; font-style: normal; color: var(--ink-3); font-family: var(--sans); margin-top: 2px; }
 
-  .rmain { display: flex; flex-direction: column; overflow: hidden; }
+  .rmain { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
   .rbar { display: flex; gap: 6px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-  #scroller { overflow-y: auto; flex: 1; }
+  #scroller { overflow-y: auto; flex: 1; min-height: 0; }
   #body { max-width: 720px; margin: 0 auto; padding: 34px 26px 120px; line-height: 2.05; }
 
   .chead { text-align: center; margin-bottom: 40px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }

@@ -1,7 +1,7 @@
 /* 原文阅读器：正文 + 脂批 + 注释 + 讲解层（导读/旁批/诗词译/小结）+ 词条 + 划词批注 */
 (function () {
   var H = window.HLM;
-  var R = { n: 1, showZhi: true, showNote: true, showGuide: true, dense: 'all',
+  var R = { n: 1, showZhi: true, showNote: true, showGuide: true, dense: 'lean',
             showLex: true, showTr: true, allTr: false, fs: 17, mentor: true };
 
   var KIND = {
@@ -16,15 +16,15 @@
     fu:   ['伏　笔', 'k-fu'],
     qian: ['钱', 'k-qian']
   };
-  // 密度为「重点」时只保留这几类（主线 + 读不懂的硬伤 + 佛理命运）
-  var CORE = { yin: 1, quan: 1, bai: 1, bg: 1, fo: 1 };
+  // 密度：lean（精简，默认）＝只把标了 key 的重点提问整条摆出来，其余旁批收成一行，点开才展开；
+  //       all ＝全部展开。偏好存在 dense2 里（旧的 dense 值作废，好让精简成为新默认）。
 
   try {
     var pref = JSON.parse(localStorage.getItem('hlm.reader') || '{}');
     ['showZhi', 'showNote', 'showGuide', 'showLex', 'showTr', 'allTr', 'mentor'].forEach(function (k) {
       if (pref[k] != null) R[k] = pref[k];
     });
-    if (pref.dense) R.dense = pref.dense;
+    if (pref.dense2 === 'all' || pref.dense2 === 'lean') R.dense = pref.dense2;
     if (pref.fs) R.fs = pref.fs;
   } catch (e) {}
 
@@ -32,7 +32,7 @@
     try {
       localStorage.setItem('hlm.reader', JSON.stringify({
         showZhi: R.showZhi, showNote: R.showNote, showGuide: R.showGuide,
-        showLex: R.showLex, showTr: R.showTr, allTr: R.allTr, dense: R.dense, fs: R.fs,
+        showLex: R.showLex, showTr: R.showTr, allTr: R.allTr, dense2: R.dense, fs: R.fs,
         mentor: R.mentor
       }));
     } catch (e) {}
@@ -119,8 +119,12 @@
     var g = (H.guide && H.guide[d.n]) || null;
     var out = [];
 
+    // 精简模式只在本回标过重点（key）时生效；没标过的回照旧全部展开
+    var lean = R.dense === 'lean' && !!(g && g.asides && g.asides.some(function (a) { return a.key; }));
+    R._lean = lean;
+
     // 回前导读
-    if (g && g.intro && R.showGuide) out.push(introHTML(g.intro));
+    if (g && g.intro && R.showGuide) out.push(introHTML(g.intro, g));
 
     // 回前墨
     if (d.preface) out.push('<div class="huiqianmo"><div class="hd">回 前 墨 · 脂砚斋总评</div>' + d.preface + '</div>');
@@ -129,7 +133,6 @@
     var byAt = {};
     if (g && g.asides && R.showGuide) {
       g.asides.forEach(function (a) {
-        if (R.dense === 'core' && !CORE[a.k] && !a.ask) return;  // 导师提问一律保留
         var at = resolveAt(d, a);
         if (at < 0) return;
         (byAt[at] = byAt[at] || []).push(a);
@@ -167,7 +170,7 @@
           '<div>缺失的是：' + H.esc(gapAt[i].what) + '</div>' +
           '<div class="why">' + H.esc(gapAt[i].why) + '</div></div>');
       }
-      (byAt[i] || []).forEach(function (a) { out.push(asideHTML(a, i)); });
+      (byAt[i] || []).forEach(function (a) { out.push(asideHTML(a, i, lean && !a.key)); });
     });
     R._tr = trAt;
 
@@ -207,7 +210,7 @@
     document.getElementById('next').disabled = d.n >= 120;
   }
 
-  function introHTML(o) {
+  function introHTML(o, g) {
     return '<div class="guide-box" data-box="intro"><div class="gh">读 前 导 读<span class="caret">▾</span></div><div class="gb">' +
       (o.one ? '<div class="one">' + H.esc(o.one) + '</div>' : '') +
       (o.bg ? '<h4>进这一回之前</h4>' + para(o.bg) : '') +
@@ -216,6 +219,10 @@
       (o.moves && o.moves.length ? '<h4>本回要练的读法</h4><div class="mchips">' +
         o.moves.map(moveChip).join('') + '</div>' : '') +
       (o.how && R.mentor ? '<h4>这一回怎么陪你读</h4>' + para(o.how) : '') +
+      (R._lean ? '<p class="leanhint">现在是<b>精简</b>模式：这一回只把最要紧的 ' +
+        g.asides.filter(function (a) { return a.key; }).length + ' 个问题整条摆出来，其余 ' +
+        g.asides.filter(function (a) { return !a.key; }).length + ' 条旁批收成一行，想看哪条点哪条。' +
+        '要全部摊开，把顶栏的「精简」换成「全部展开」。</p>' : '') +
       '</div></div>';
   }
 
@@ -242,13 +249,24 @@
     return '<div class="trans" data-trbox="' + i + '"><div class="th">现 代 文</div>' + para(x) + '</div>';
   }
 
-  function asideHTML(a, at) {
+  // 精简模式下收成一行时显示什么：提问式不能露出结论，只说停在哪句；直讲式直接给标题
+  function miniLabel(a) {
+    if (a.ask && R.mentor) {
+      var s = a.stop || a.ask;
+      return (a.practice ? '轮到你' : '停一下') + '：「' + H.esc(s.length > 30 ? s.slice(0, 30) + '…' : s) + '」';
+    }
+    return H.esc(a.t);
+  }
+
+  function asideHTML(a, at, mini) {
     var k = KIND[a.k] || KIND.bai;
     var key = 'ch:' + R.n + ':aside:' + at + ':' + a.k;
     var has = !!H.notes.get(key);
     var foot = '<div class="afoot"><button class="anb">' + (has ? '✎ 已有批注' : '＋ 就这条写点什么') + '</button></div>';
-    var open = '<div class="aside' + (has ? ' hasnote' : '') + (a.ask && R.mentor ? ' mentor' : '') +
-      '" data-k="' + a.k + '" style="--kc:var(--' + k[1] + ')" data-akey="' + key + '">';
+    var open = '<div class="aside' + (has ? ' hasnote' : '') + (a.ask && R.mentor ? ' mentor' : '') + (mini ? ' mini' : '') +
+      '" data-k="' + a.k + '" style="--kc:var(--' + k[1] + ')" data-akey="' + key + '">' +
+      (mini ? '<div class="amini" title="点开看这条旁批"><span class="ak">' + k[0] + '</span><span class="aml">' + miniLabel(a) +
+        '</span><span class="amc">展开 ▸</span></div>' : '');
     if (a.ask && R.mentor) {
       return open +
         '<div class="ah"><span class="ak">' + k[0] + '</span>' +
@@ -272,7 +290,8 @@
     return '<div class="poem-tr" data-poem="' + i + '">' +
       '<div class="pt"><span>白话译文' + (p.t ? ' · ' + H.esc(p.t) : '') + '</span><span class="tg">收起 ▾</span></div>' +
       p.tr.map(function (l) { return '<div class="pl">' + H.esc(l) + '</div>'; }).join('') +
-      (p.x ? '<div class="px">' + para(p.x) + '</div>' : '') + '</div>';
+      (p.x ? (R._lean ? '<div class="pxt">看这首的解读 ▸</div>' : '') +
+        '<div class="px' + (R._lean ? ' hide' : '') + '">' + para(p.x) + '</div>' : '') + '</div>';
   }
 
   // 本回练过的读法：从旁批的 move 字段自动汇总，讲过几次、自己试过几次
@@ -316,12 +335,15 @@
       }).join('');
     }
     if (g) h += movesRecap(g);
+    var fixed = (H.changelog || []).filter(function (c) { return c.ch === R.n; }).length;
     if (o.q && o.q.length) {
       h += '<h4>留给你的问题</h4><ol>' + o.q.map(function (x, j) {
         return '<li>' + H.esc(x) +
           '<div style="margin-top:6px"><button class="btn sm" data-oq="' + j + '">写下你的答案</button></div></li>';
       }).join('') + '</ol>';
     }
+    if (fixed) h += '<p class="muted" style="font-size:12.5px;margin-top:1.4em">这一回的讲解改正过 ' + fixed +
+      ' 处旧错，见 <a href="changes.html#ch' + R.n + '">修订记录</a>。</p>';
     return '<div class="guide-box tail" data-box="outro"><div class="gh">读 后 小 结<span class="caret">▾</span></div><div class="gb">' + h + '</div></div>';
   }
 
@@ -370,6 +392,19 @@
         var box = t.parentElement;
         box.classList.toggle('fold');
         t.querySelector('.tg').textContent = box.classList.contains('fold') ? '展开 ▸' : '收起 ▾';
+      };
+    });
+    document.querySelectorAll('.poem-tr .pxt').forEach(function (t) {
+      t.onclick = function () {
+        var on = t.nextElementSibling.classList.toggle('hide');
+        t.textContent = on ? '看这首的解读 ▸' : '收起解读 ▾';
+      };
+    });
+    document.querySelectorAll('.aside .amini').forEach(function (h) {
+      h.onclick = function (ev) {
+        ev.stopPropagation();
+        var on = h.parentElement.classList.toggle('mini');
+        h.querySelector('.amc').textContent = on ? '展开 ▸' : '收起 ▾';
       };
     });
     document.querySelectorAll('.aside .anb').forEach(function (b) {

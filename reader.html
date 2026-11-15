@@ -62,9 +62,9 @@
       <span style="flex:1"></span>
       <button class="btn sm" id="guideBtn" title="显示/隐藏导读、旁批、诗词译文与小结">讲解</button>
       <button class="btn sm" id="mentorBtn" title="导师模式：先指一句、问一个问题，展开才是解读。关掉则直接显示解读">导师</button>
-      <select id="denseSel" class="densesel" title="旁批密度">
-        <option value="all">全部旁批</option>
-        <option value="core">只看重点</option>
+      <select id="denseSel" class="densesel" title="精简：每回只摆出最要紧的几个问题，其余旁批收成一行；全部展开：所有旁批都摊开">
+        <option value="lean">精简</option>
+        <option value="all">全部展开</option>
       </select>
       <button class="btn sm" id="trBtn" title="一次展开本回全部现代文译文（平时点段末的「译」逐段看）">全译</button>
       <button class="btn sm" id="lexBtn" title="难词虚线标注，点击看释义">词条</button>
@@ -93,6 +93,7 @@
 <script src="data/lexicon.js"></script>
 <script src="data/moves.js"></script>
 <script src="data/olj.js"></script>
+<script src="data/changelog.js"></script>
 <script src="assets/js/reader.js"></script>
 <script>
   HLM.mountNav('reader.html');

@@ -489,3 +489,20 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .olvs .hh { font-family: var(--sans); font-size: 11px; letter-spacing: .14em; color: var(--jin); margin-bottom: 4px; }
 .olask { margin: 8px 0 6px; font-size: .95em; }
 .olask b { color: var(--zhu); margin-right: 6px; }
+
+/* 精简模式：非重点旁批收成一行，点开才展开 */
+.aside .amini { display: flex; align-items: baseline; gap: 8px; cursor: pointer; }
+.aside .amini .aml { flex: 1; min-width: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.6;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aside .amini .amc { flex: none; font-size: 12px; color: var(--ink-3); }
+.aside .amini:hover .amc { color: var(--ink); }
+.aside.mini { padding: 7px 14px; margin: .7em 0; }
+.aside.mini > :not(.amini) { display: none; }
+.aside:not(.mini) > .amini { justify-content: flex-end; margin-bottom: 2px; }
+.aside:not(.mini) > .amini .ak, .aside:not(.mini) > .amini .aml { display: none; }
+.leanhint { margin-top: 1.2em; padding: 9px 12px; border-radius: 8px; font-size: 13px; line-height: 1.75;
+  background: color-mix(in srgb, var(--jin) 9%, transparent); color: var(--ink-2); }
+.poem-tr .pxt { margin-top: 8px; font-family: var(--sans); font-size: 12.5px; color: var(--ink-3); cursor: pointer; }
+.poem-tr .pxt:hover { color: var(--ink); }
+.poem-tr.fold .pxt { display: none; }
+.poem-tr .px.hide { display: none; }

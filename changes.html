@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>修订记录 · 红楼梦研读</title>
+<link rel="stylesheet" href="assets/css/site.css"/>
+<style>
+  .chg h2 { font-size: 17px; margin: 2em 0 .6em; scroll-margin-top: 70px; }
+  .chg h2 a { font-family: var(--sans); font-size: 12px; font-weight: 400; margin-left: 10px; }
+  .chg .ci { padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; line-height: 1.85; }
+  .chg .ci .cw { display: block; font-family: var(--sans); font-size: 12px; color: var(--ink-3); margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap chg">
+
+<h1>修订记录</h1>
+<p class="lede">这个站早期的讲解是凭记忆写的，错了不少。改成“导师模式”时，每一回都对着原文和脂批重新核过，查出的旧错记在这里。原先这些说明散在各回的旁批里，读起来碍事，现在集中到这一页。</p>
+
+<div id="list"></div>
+
+</div>
+<script src="assets/js/app.js"></script>
+<script src="data/changelog.js"></script>
+<script>
+  HLM.mountNav('');
+  (function () {
+    var by = {}, order = [];
+    (HLM.changelog || []).forEach(function (c) { if (!by[c.ch]) { by[c.ch] = []; order.push(c.ch); } by[c.ch].push(c); });
+    order.sort(function (a, b) { return a - b; });
+    document.getElementById('list').innerHTML = order.map(function (n) {
+      return '<h2 id="ch' + n + '">第 ' + n + ' 回<a href="reader.html#ch' + n + '">去读这一回 →</a></h2>' +
+        by[n].map(function (c) {
+          return '<div class="ci"><span class="cw">' + HLM.esc(c.where) + '</span>' + HLM.esc(c.text) + '</div>';
+        }).join('');
+    }).join('') || '<p class="muted">还没有记录。</p>';
+    if (location.hash) { var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView(); }
+  })();
+</script>
+</body>
+</html>
